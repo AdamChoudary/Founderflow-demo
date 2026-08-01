@@ -1,26 +1,29 @@
-[38;2;131;148;150m─────┬──────────────────────────────────────────────────────────────────────────[0m
-     [38;2;131;148;150m│ [0m[1mSTDIN[0m
-     [38;2;131;148;150m│ [0mSize: [1m-[0m
-[38;2;131;148;150m─────┼──────────────────────────────────────────────────────────────────────────[0m
-[38;2;131;148;150m   1[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport AtmosphereDefs from "@/components/AtmosphereDefs";[0m
-[38;2;131;148;150m   2[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport Nav from "@/components/Nav";[0m
-[38;2;131;148;150m   3[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport Hero from "@/components/Hero";[0m
-[38;2;131;148;150m   4[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport BriefingPreview from "@/components/BriefingPreview";[0m
-[38;2;131;148;150m   5[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport Stats from "@/components/Stats";[0m
-[38;2;131;148;150m   6[0m [38;2;131;148;150m│[0m [38;2;248;248;242mimport Experts from "@/components/Experts";[0m
-[38;2;131;148;150m   7[0m [38;2;131;148;150m│[0m 
-[38;2;131;148;150m   8[0m [38;2;131;148;150m│[0m [38;2;248;248;242mexport default function Home() {[0m
-[38;2;131;148;150m   9[0m [38;2;131;148;150m│[0m [38;2;248;248;242m  return ([0m
-[38;2;131;148;150m  10[0m [38;2;131;148;150m│[0m [38;2;248;248;242m    <>[0m
-[38;2;131;148;150m  11[0m [38;2;131;148;150m│[0m [38;2;248;248;242m      <AtmosphereDefs />[0m
-[38;2;131;148;150m  12[0m [38;2;131;148;150m│[0m [38;2;248;248;242m      <Nav />[0m
-[38;2;131;148;150m  13[0m [38;2;131;148;150m│[0m [38;2;248;248;242m      <main className="flex-1">[0m
-[38;2;131;148;150m  14[0m [38;2;131;148;150m│[0m [38;2;248;248;242m        <Hero />[0m
-[38;2;131;148;150m  15[0m [38;2;131;148;150m│[0m [38;2;248;248;242m        <BriefingPreview />[0m
-[38;2;131;148;150m  16[0m [38;2;131;148;150m│[0m [38;2;248;248;242m        <Stats />[0m
-[38;2;131;148;150m  17[0m [38;2;131;148;150m│[0m [38;2;248;248;242m        <Experts />[0m
-[38;2;131;148;150m  18[0m [38;2;131;148;150m│[0m [38;2;248;248;242m      </main>[0m
-[38;2;131;148;150m  19[0m [38;2;131;148;150m│[0m [38;2;248;248;242m    </>[0m
-[38;2;131;148;150m  20[0m [38;2;131;148;150m│[0m [38;2;248;248;242m  );[0m
-[38;2;131;148;150m  21[0m [38;2;131;148;150m│[0m [38;2;248;248;242m}[0m
-[38;2;131;148;150m─────┴──────────────────────────────────────────────────────────────────────────[0m
+import AtmosphereDefs from "@/components/AtmosphereDefs";
+import Nav from "@/components/Nav";
+import Hero from "@/components/Hero";
+import BriefingPreview from "@/components/BriefingPreview";
+import Integrations from "@/components/Integrations";
+import Stats from "@/components/Stats";
+import Experts from "@/components/Experts";
+import HowItWorks from "@/components/HowItWorks";
+import ClosingCTA from "@/components/ClosingCTA";
+import Footer from "@/components/Footer";
+
+export default function Home() {
+  return (
+    <>
+      <AtmosphereDefs />
+      <Nav />
+      <main className="flex-1">
+        <Hero />
+        <BriefingPreview />
+        <Integrations />
+        <Stats />
+        <Experts />
+        <HowItWorks />
+        <ClosingCTA />
+      </main>
+      <Footer />
+    </>
+  );
+}
