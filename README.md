@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Founderflow-demo
 
-## Getting Started
+Marketing site for FounderFlow - an AI executive chief of staff that reads a
+founder inbox overnight through a six-expert pipeline and leaves one briefing.
 
-First, run the development server:
+Next.js 16 - React 19 - Tailwind CSS v4 (CSS-first, no tailwind.config.js).
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| script | does |
+|---|---|
+| `npm run dev` | dev server on :3000 |
+| `npm run build` | production build |
+| `npm run check:glyphs` | fails if display copy uses a character the display face cannot draw |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Read before changing anything visual
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **`DESIGN.md`** - source of truth: palette system, hard font constraints,
+  the accessibility floor and the measurement harness.
+- **`AGENTS.md`** - brand rules, including the blank-glyph trap.
+- **`docs/design-phases.md`** - what was built and why.
 
-## Learn More
+## Fonts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All three faces are licensed for **personal use only**. Commercial use
+requires buying a licence from each foundry - see `AGENTS.md`.
