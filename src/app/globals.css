@@ -1,26 +1,1127 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   All three brand fonts ship a single Regular weight - no bold, no italic.
+   So hierarchy here is built from SIZE, COLOUR, CASE and LETTER-SPACING only.
+   The scale below is deliberately wide-gapped for that reason.
+--------------------------------------------------------------------------- */
+
+/* `static` so all eight rungs reach :root whether or not a utility happens to
+   reference them. Tailwind tree-shakes theme variables by default, which for a
+   ramp is the wrong behaviour twice over: a token used only inside an arbitrary
+   value silently resolves to nothing, and the measurement harness cannot read a
+   palette that is not in the document. */
+@theme static {
+  /* ---- the ramp ----------------------------------------------------------
+     ONE hue family, one page. Six rungs of evergreen from ink to paper, plus
+     a two-step accent. Nothing here is a patch on anything else: every rung
+     states its L / C / H and every pair below is a COMPUTED WCAG ratio, not
+     an estimate.
+
+       token       L      C      H     hex
+       ink       0.205  0.026  158   #0C1B13
+       moss      0.268  0.032  156   #192B1F
+       moss-lift 0.315  0.036  154   #233729
+       edge      0.460  0.042  152   #475F4D
+       sage      0.720  0.040  150   #94AC98
+       paper     0.955  0.007  120   #EFF1EC
+       lime      0.896  0.248  132   #9BFC05  (fixed by the logo)
+       lime-dim  0.800  0.155  140   #85D673
+
+     Chroma climbs 0.026 -> 0.042 with lightness and then FALLS to 0.007 at
+     paper: a true neutral at the top, which is what the old bone (C 0.060)
+     never was and why half the page read as army drab. Hue drifts 158 -> 150
+     across the darks, which is the standard warm-shadow/cool-light shift, not
+     six unrelated greens. The accent is the only excursion, and it is a
+     two-rung ladder (0.155 then 0.248) so lime has something to relate to
+     instead of spiking alone off a flat field.
+
+     MEASURED CONTRAST (WCAG 2.x, computed from the sRGB these oklch values
+     resolve to - all eight are inside sRGB, nothing is being gamut-clipped):
+
+       fg            ink    moss   moss-lift   paper    lime
+       ink          1.00    1.19      1.40     15.63   13.85
+       moss         1.19    1.00      1.18     13.16   11.66
+       moss-lift    1.40    1.18      1.00     11.18    9.90
+       edge         2.55    2.15      1.82      6.13    5.43
+       sage         7.29    6.14      5.22      2.14    1.90
+       paper       15.63   13.16     11.18      1.00    1.13
+       lime        13.85   11.66      9.90      1.13    1.00
+       lime-dim    10.02    8.44      7.16      1.56    1.38
+
+     THE THREE PROHIBITIONS. They are the whole discipline; the ramp only
+     works because these are never bent.
+
+       1. edge is 2.15:1 on moss. Hairlines, rules, borders and fills on dark
+          - NEVER text on dark. On PAPER it is 6.13:1 and is the caption /
+          supporting voice. One token, two measured jobs.
+       2. On paper, sage (2.14), lime-dim (1.56) and lime (1.13) are ILLEGAL.
+          Text on paper is ink (15.63) or moss (13.16), full stop.
+       3. Accent on paper is a lime FILL with ink text (13.85), never lime
+          text. On dark, lime is the CTA fill with moss text (11.66) and is
+          permitted in exactly three places on the page: the logo mark, the
+          primary CTA, the one priority flag in the briefing. Every other
+          accent - rules, node rings, active tab, numerals, eyebrows - is
+          lime-dim (8.44 on moss, 7.16 on moss-lift).
+
+     Body copy on dark is paper (13.16); secondary copy on dark is sage
+     (6.14 on moss, 5.22 on moss-lift, 7.29 on ink). Both clear 4.5:1 at any
+     size, which matters because no face here has a bold cut and 24px is the
+     only large-text threshold on this project.
+  ------------------------------------------------------------------------ */
+
+  --color-ink: oklch(0.205 0.026 158); /* #0C1B13 page base, footer, condensed nav; primary text ON paper 15.63:1 */
+  --color-moss: oklch(0.268 0.032 156); /* #192B1F THE ground. body bg; text on paper 13.16:1; text on lime 11.66:1 */
+  --color-moss-lift: oklch(0.315 0.036 154); /* #233729 the ONLY section modulation, +0.047 L on the same hue */
+  --color-edge: oklch(0.460 0.042 152); /* #475F4D rules on dark 2.15:1 (never text); supporting text on paper 6.13:1 */
+  --color-sage: oklch(0.720 0.040 150); /* #94AC98 secondary text on dark 6.14 / 5.22 / 7.29:1. Never on paper (2.14) */
+  --color-paper: oklch(0.955 0.007 120); /* #EFF1EC primary text on dark 13.16:1, and the material of every lit object */
+  --color-lime: oklch(0.896 0.248 132); /* #9BFC05 FIXED by the logo. CTA fill only. Never text on paper (1.13) */
+  --color-lime-dim: oklch(0.800 0.155 140); /* #85D673 all secondary accent on dark 8.44 / 7.16:1. Never on paper (1.56) */
+
+  /* ---- type scale --------------------------------------------------------
+     ONE token, ONE role. The audit found d3 doing three unrelated jobs
+     because the d2:d3 step was exactly 2.0 while every other step is
+     1.33-1.5 - a hole that wide forces every mid-level heading down onto
+     the callout tier. d2s closes it: 72/48 = 1.5, 48/36 = 1.33.
+
+       d1    hero headline, once on the page
+       d2    every section h2, no exceptions
+       d2s   subsection heads only (pipeline step titles, expert panel name)
+       d3    the single callout sentence
+       lead  section supporting paragraph
+       body  everything else
+
+     No component deviates from that table.
+  ------------------------------------------------------------------------ */
+
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.22em;
+
+  --text-fine: 0.875rem;
+  --text-fine--line-height: 1.6;
+  --text-fine--letter-spacing: 0.015em;
+
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.75;
+  --text-body--letter-spacing: 0.012em;
+
+  /* Tops out at 24px on purpose. WCAG treats 24px as large text, and none of
+     these faces has a bold cut to reach the 18.66px bold threshold instead -
+     so 24px is what lets the lead paragraph sit on a photograph at 3:1. */
+  --text-lead: clamp(1.1875rem, 0.95rem + 0.9vw, 1.5rem);
+  --text-lead--line-height: 1.6;
+  --text-lead--letter-spacing: 0.008em;
+
+  --text-d3: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);
+  --text-d3--line-height: 1.15;
+
+  --text-d2s: clamp(1.75rem, 1.2rem + 2.4vw, 3rem);
+  --text-d2s--line-height: 1.1;
+
+  /* No negative tracking on the display sizes: TypoGraphica is already
+     tightly spaced and goes muddy when pulled in further. */
+  --text-d2: clamp(2.25rem, 1.3rem + 4vw, 4.5rem);
+  --text-d2--line-height: 1.04;
+  --text-d2--letter-spacing: 0em;
+
+  /* Capped at 6rem so the two-line hero stays two lines at 1440. */
+  --text-d1: clamp(2.5rem, 1rem + 6.2vw, 6rem);
+  --text-d1--line-height: 1;
+  --text-d1--letter-spacing: 0em;
+
+  /* Sized for the widest real value, not the narrowest. At 9rem a single "6"
+     looked great and "300+" overflowed its third of the grid into the next
+     column. 6.5rem fits four characters in a 384px column. */
+  --text-numeral: clamp(3rem, 1.2rem + 5.4vw, 6.5rem);
+  --text-numeral--line-height: 0.9;
+}
+
+/* HeroAmbience writes this on scroll: 0 at the top of the hero, 1 once the
+   hero has been scrolled past. Registered rather than left as a loose custom
+   property so every consumer gets a typed 0 without a var() fallback, and so
+   the value interpolates instead of snapping between frames. */
+@property --hero-clear {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-typographica);
+  --font-body: var(--font-gelline);
+  --font-accent: var(--font-mantira);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* --------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    /* None of the three faces has a bold or italic cut. Without this the
+       browser fakes them by smearing/shearing the outlines. */
+    font-synthesis: none;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ONE ground, nav to footer. Sections modulate between moss and moss-lift
+     and nothing else; anything light on this page is an OBJECT resting on the
+     ground, never a floor. Setting it here means a section that forgets its
+     background inherits the right one instead of punching a hole. */
+  body {
+    background: var(--color-moss);
+    color: var(--color-paper);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.75;
+    letter-spacing: 0.012em;
+  }
+
+  /* The nav is fixed, so an anchor jump would otherwise park the section's
+     heading underneath it. Clears the pill plus its top offset. */
+  section[id] {
+    scroll-margin-top: 6.5rem;
+  }
+
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-moss);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      /* `animation-duration` is IGNORED on a progress-based timeline - progress
+         is scroll position, not time. Without this line every scroll-driven
+         animation would run at full amplitude for reduced-motion users and the
+         reset above would silently not apply to it. */
+      animation-timeline: auto !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* One exemption, and it is not a style preference.
+       `animation-timeline: auto` above would put the page-progress rail on the
+       document timeline, where the 0.01ms duration completes it instantly -
+       leaving a bar that reads FULL no matter where you are on the page. That
+       is not "less motion", it is wrong information. The rail only moves when
+       the reader moves it, so it stays. */
+    .scroll-rail-progress {
+      animation-timeline: scroll(root block) !important;
+      animation-duration: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* ---- atmosphere -------------------------------------------------------
+     HERO ONLY. This is the one place on the page with a real photograph
+     behind it; everywhere else the ground is a flat token and stays that way.
+     Three stacked layers: fog pools, angled light shafts, canopy silhouette,
+     then a flat wash that does the actual legibility work.
+
+     Retinted into the ramp - the pools were fern/forest/bark, three hues that
+     no longer exist. moss-lift and edge are the same family as the ground, so
+     the fog now reads as depth in the plate rather than as a second palette.
+  ------------------------------------------------------------------------ */
+
+  .atmos {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .atmos-fog {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(
+        ellipse 55% 45% at 78% 18%,
+        color-mix(in oklab, var(--color-edge) 38%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 18% 38%,
+        color-mix(in oklab, var(--color-moss-lift) 75%, transparent),
+        transparent 64%
+      ),
+      radial-gradient(
+        ellipse 90% 55% at 50% 104%,
+        color-mix(in oklab, var(--color-edge) 30%, transparent),
+        transparent 68%
+      );
+    filter: blur(28px);
+  }
+
+  /* Angled god-rays, two passes at different pitches so the interference
+     between them reads as broken light rather than wallpaper stripes. */
+  .atmos-shafts {
+    position: absolute;
+    inset: -30% -10% 0;
+    background:
+      repeating-linear-gradient(
+        101deg,
+        transparent 0 3.5rem,
+        color-mix(in oklab, var(--color-paper) 12%, transparent) 3.5rem 4.4rem,
+        transparent 4.4rem 9rem
+      ),
+      repeating-linear-gradient(
+        97deg,
+        transparent 0 6rem,
+        color-mix(in oklab, var(--color-paper) 7%, transparent) 6rem 7.6rem,
+        transparent 7.6rem 15rem
+      );
+    filter: blur(26px);
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 62% at 52% -4%,
+      #000 8%,
+      transparent 74%
+    );
+    mask-image: radial-gradient(
+      ellipse 70% 62% at 52% -4%,
+      #000 8%,
+      transparent 74%
+    );
+  }
+
+  /* Canopy silhouette. Smooth ellipses read as gradient blobs, so the whole
+     layer is pushed through an SVG turbulence displacement (see
+     <AtmosphereDefs />) which chews the edges into something foliage-shaped.
+     This layer is decoration only - it carries no contrast guarantee. */
+  .atmos-canopy {
+    position: absolute;
+    inset: -12%;
+    filter: url(#canopy-warp);
+    background:
+      radial-gradient(
+        ellipse 30% 22% at 10% 2%,
+        color-mix(in oklab, #000 88%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        ellipse 24% 17% at 34% -2%,
+        color-mix(in oklab, #000 80%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 20% 14% at 52% 3%,
+        color-mix(in oklab, #000 72%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        ellipse 32% 24% at 72% -3%,
+        color-mix(in oklab, #000 88%, transparent),
+        transparent 66%
+      ),
+      radial-gradient(
+        ellipse 22% 16% at 93% 1%,
+        color-mix(in oklab, #000 78%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 130% 52% at 50% -8%,
+        color-mix(in oklab, #000 74%, transparent),
+        transparent 72%
+      ),
+      /* corner weight - stops the frame reading as an even vignette */
+      radial-gradient(
+          ellipse 46% 46% at 0% 0%,
+          color-mix(in oklab, #000 70%, transparent),
+          transparent 74%
+        ),
+      radial-gradient(
+        ellipse 46% 46% at 100% 0%,
+        color-mix(in oklab, #000 70%, transparent),
+        transparent 74%
+      );
+  }
+
+  /* The flat wash. NOT filtered, because this is what actually holds pale
+     text above 4.5:1 no matter what the canopy and fog are doing. */
+  .atmos-wash {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-moss) 88%, transparent) 0%,
+      color-mix(in oklab, var(--color-moss) 46%, transparent) 38%,
+      color-mix(in oklab, var(--color-moss) 22%, transparent) 58%,
+      color-mix(in oklab, var(--color-moss) 92%, transparent) 100%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* the warp is static, but skip the expensive raster for anyone who has
+       asked the OS to keep things simple */
+    .atmos-canopy {
+      filter: none;
+      opacity: 0.85;
+    }
+  }
+
+  /* ---- grain -------------------------------------------------------------
+     ONE ground means ONE blend mode. This used to flip between soft-light on
+     the dark sections and multiply on the light ones, with the noise image
+     living on the fade variants - so a bare `.grain` drew nothing at all.
+     The image is on the base class now and the mode is fixed.
+  ------------------------------------------------------------------------ */
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* 0.5 was flattening the photograph; grain should be felt, not seen */
+    opacity: 0.32;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Soft-light grain shifts even flat moss, so a grained section butting
+     against an ungrained one leaves a visible line across the full width.
+     Only needed where the hero's photographic plate hands off. */
+  .grain-fade-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, #000 84%, transparent 99%);
+    mask-image: linear-gradient(to bottom, #000 84%, transparent 99%);
+  }
+
+  /* ---- type helpers ---------------------------------------------------- */
+
+  .eyebrow {
+    font-family: var(--font-accent);
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    /* CSS adds tracking AFTER the final glyph too, so a centred eyebrow sits
+       ~0.11em left of true centre. Cancel the trailing space. */
+    margin-right: -0.22em;
+  }
+
+  /* Display headings.
+     TypoGraphica's word space is very narrow, so words run together at
+     display sizes without this. Use `.headline`, not the bare `font-display`
+     utility, for anything set in the display face. */
+  .headline {
+    font-family: var(--font-display);
+    word-spacing: 0.16em;
+  }
+
+  /* ---- rules -------------------------------------------------------------
+     Every hairline on the page is edge, because there is only one kind of
+     ground left to draw one on. `border-edge/40` is the utility; these two
+     names are the old light-ground/dark-ground pair kept pointing at the
+     same answer so existing call sites do not blink out mid-rebuild.
+     ponytail: transitional aliases, delete once the sections stop using them.
+  ------------------------------------------------------------------------ */
+
+  .hairline-bone,
+  .hairline-dark {
+    border-color: color-mix(in oklab, var(--color-edge) 70%, transparent);
+  }
+
+  /* ---- hero plate --------------------------------------------------------
+     A full-bleed photograph carries the hero. The scrim underneath the copy
+     is what makes pale text on top of an arbitrary frame legal rather than
+     lucky - never rely on the image being dark where the words land.
+  ------------------------------------------------------------------------ */
+
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .hero-photo img {
+    object-fit: cover;
+    /* Slight overscale so the settle never exposes an edge. --hero-clear
+       drives a slow push-in as you scroll: the frame recedes instead of
+       fighting the content arriving underneath it. */
+    transform: scale(calc(1.04 + var(--hero-clear) * 0.055));
+    transform-origin: 50% 42%;
+  }
+
+  /* ---- exit hand-off -----------------------------------------------------
+     The last stretch of the hero is a hand-off, not a cut. The frame pulls
+     focus and the words leave, so the eye is already unanchored by the time
+     the briefing arrives underneath.
+
+     --hero-exit remaps --hero-clear so nothing happens for the first 42% of
+     the scroll: an effect that starts on pixel one reads as a bug in the
+     scroll, not as an exit.
+
+     Driven off the existing scroll variable rather than `animation-timeline:
+     view()`. One scroll listener already runs here and already writes this
+     value every frame, so a second system would buy nothing except a
+     @supports fallback and two more browsers where it silently does nothing.
+
+     The DEFOCUS IS ON THE PHOTO, NOT THE CONTENT. A filter on a subtree
+     containing text drops it out of subpixel antialiasing for the whole
+     session - the headline would render visibly thinner at rest, before any
+     scrolling has happened. The frame has no text in it.
+  ------------------------------------------------------------------------ */
+
+  .hero-exit {
+    --e: clamp(0, calc((var(--hero-clear) - 0.42) / 0.58), 1);
+  }
+
+  .hero-photo {
+    filter: blur(calc(var(--e, 0) * 3px));
+  }
+
+  .hero-content {
+    opacity: calc(1 - var(--e, 0) * 0.9);
+    transform: translate3d(0, calc(var(--e, 0) * -30px), 0)
+      scale(calc(1 - var(--e, 0) * 0.018));
+  }
+
+  /* The scrim deepens as the hero leaves, so the photograph dissolves into
+     the moss below instead of being cut off by the next section's edge. */
+  .hero-scrim::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-moss);
+    opacity: calc(var(--e, 0) * 0.55);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* --hero-clear is never written under reduced motion, so --e is already
+       0 and all three rules above are no-ops. Belt and braces: if the JS
+       guard is ever removed, this still holds. */
+    .hero-exit {
+      --e: 0;
+    }
+  }
+
+  /* Three jobs in one element:
+       1. a pool behind the copy, so paper text clears 4.5:1 on any frame
+       2. a top wash, so the nav reads against a bright canopy
+       3. a bottom fade that hands off to the section below  */
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    /* The pool tracks the copy column rather than flooding the frame, so the
+       trunks and the forest floor stay visible. Exposed as variables because
+       narrow screens need more: the lead paragraph clamps below 24px there,
+       which drops it out of WCAG's large-text allowance and back to 4.5:1,
+       and object-cover crops the frame much tighter. */
+    /* Tuned to /hero-filaments.jpg, whose centre is genuinely empty. A render
+       needs far less protection than a photograph - the forest plate needed
+       46%/16% here for the same result. Re-measure if the plate changes. */
+    --scrim-w: 56%;
+    --scrim-h: 52%;
+    --scrim-core: 22%;
+    --scrim-mid: 6%;
+
+    background:
+      /* 1. copy pool. Deliberately light - the legibility budget is spent on
+         solid text rather than on flooding the photograph, because drowning
+         the image defeats the point of having one. */
+      radial-gradient(
+        ellipse var(--scrim-w) var(--scrim-h) at 50% 43%,
+        color-mix(in oklab, var(--color-moss) var(--scrim-core), transparent),
+        color-mix(in oklab, var(--color-moss) var(--scrim-mid), transparent) 56%,
+        transparent 82%
+      ),
+      /* 2. nav wash */
+      linear-gradient(
+          to bottom,
+          color-mix(in oklab, var(--color-moss) 50%, transparent) 0%,
+          color-mix(in oklab, var(--color-moss) 6%, transparent) 28%,
+          transparent 46%
+        ),
+      /* 3. the clearing in this frame glows low and centre-right, exactly
+         where the CTAs and base bar sit. This stop is what keeps those
+         legible; re-tune it if the image is ever swapped. */
+        linear-gradient(
+          to bottom,
+          transparent 52%,
+          color-mix(in oklab, var(--color-moss) 8%, transparent) 72%,
+          color-mix(in oklab, var(--color-moss) 46%, transparent) 90%,
+          var(--color-moss) 100%
+        );
+  }
+
+  @media (max-width: 640px) {
+    .hero-scrim {
+      --scrim-w: 108%;
+      --scrim-h: 46%;
+      --scrim-core: 68%;
+      --scrim-mid: 38%;
+    }
+  }
+
+  /* ---- headline reveal ---------------------------------------------------
+     Each line rises out of a clipped box. padding/margin pair keeps the
+     descenders in "before you wake." from being sheared off by the clip.
+  ------------------------------------------------------------------------ */
+
+  .line {
+    display: block;
+    overflow: hidden;
+    /* Symmetric, not bottom-only. --text-d1 runs at line-height:1, so the
+       content box is exactly 1em while the face's ascent+descent exceeds it -
+       descenders were covered and the tops of caps were being clipped. */
+    padding-block: 0.1em 0.14em;
+    margin-block: -0.1em -0.14em;
+  }
+
+  /* overflow:hidden shears the 2px/3px-offset focus ring on anything
+     focusable inside a clipped line. */
+  .line:has(:focus-visible) {
+    overflow: visible;
+  }
+
+  .line > span {
+    display: block;
+    animation: line-up 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes line-up {
+    from {
+      transform: translateY(105%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .line > span {
+      animation: none !important;
+    }
+    .hero-photo img {
+      transform: scale(1.04);
+    }
+  }
+
+  /* ---- entrance, above the fold ----------------------------------------
+     CSS-only, so the hero headline never waits on JavaScript to become
+     visible. Anything above the fold uses this, not .reveal.
+  ------------------------------------------------------------------------ */
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise {
+    animation: rise 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ---- motion primitives -------------------------------------------------
+     Everything left in this file either fires ONCE on arrival or scrubs 1:1
+     against the reader's own scroll or click. There are no infinite loops on
+     this page - twelve were removed - and seven keyframes remain: line-up,
+     rise, rail-scrub, rail-scrub-y, node-spark, draw-in, panel-in.
+
+     All of it animates transform/opacity only, so none of it touches layout,
+     and all of it resolves to its finished state under prefers-reduced-motion.
+  ------------------------------------------------------------------------ */
+
+  /* Children of a revealed block arrive in sequence rather than as a slab.
+     Sequence reads as assembly; simultaneous reads as a page-load.
+     `--stagger-base` offsets a whole group, so several groups inside one
+     reveal can run one after another instead of all at once - which is what
+     turns three separate lists into a single choreographed build. */
+  .stagger {
+    --stagger-base: 0ms;
+    /* 55ms. Below ~40ms a group reads as arriving at once; above ~70ms the eye
+       has already reached item n+1 and is waiting for it, which reads as slow
+       software rather than as choreography. Six items span 275ms total. */
+    --stagger-step: 55ms;
+  }
+
+  .stagger > * {
+    opacity: 0;
+  }
+
+  .reveal.is-in .stagger > * {
+    animation: rise 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--stagger-base) + var(--i, 0) * var(--stagger-step));
+  }
+
+  .reveal.is-in .stagger > *:nth-child(1) {
+    --i: 0;
+  }
+  .reveal.is-in .stagger > *:nth-child(2) {
+    --i: 1;
+  }
+  .reveal.is-in .stagger > *:nth-child(3) {
+    --i: 2;
+  }
+  .reveal.is-in .stagger > *:nth-child(4) {
+    --i: 3;
+  }
+  .reveal.is-in .stagger > *:nth-child(5) {
+    --i: 4;
+  }
+  .reveal.is-in .stagger > *:nth-child(6) {
+    --i: 5;
+  }
+
+  /* Once the build has played, pin it. A CSS animation restarts on re-layout
+     or when an ancestor comes back from display:none, and during the restarted
+     delay the child sits at opacity 0 again - so revealed content could vanish
+     on a viewport resize. Reveal adds `is-settled` after the longest chain
+     completes; from then on the finished state is unconditional. */
+  .reveal.is-settled .stagger > * {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal.is-settled .rail-draw {
+    transform: scaleX(1);
+  }
+
+  .reveal.is-settled .node-pop {
+    transform: scale(1);
+  }
+
+  /* An elevated object settles into place rather than sliding up like body
+     copy: a shade of scale plus a longer, softer curve. */
+  .reveal-card {
+    opacity: 0;
+    transform: translateY(26px) scale(0.985);
+    transition:
+      opacity 0.56s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.56s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal-card.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (scripting: none) {
+    .reveal-card {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* A rail that draws itself left to right as the section arrives. Scaling a
+     1px line is free; animating width is not. */
+  .rail-draw {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-in .rail-draw {
+    transform: scaleX(1);
+  }
+
+  /* Pipeline nodes settle in with a slight overshoot, after the rail has
+     passed them. */
+  .node-pop {
+    transform: scale(0);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .reveal.is-in .node-pop {
+    transform: scale(1);
+  }
+
+  /* Underline that grows from the left. background-size animates on the
+     compositor; a border or ::after width does not. */
+  .link-sweep {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* The section you are actually in keeps its underline drawn. */
+  .link-sweep[aria-current] {
+    color: var(--color-paper);
+    background-size: 100% 1px;
+  }
+
+  .link-sweep:hover,
+  .link-sweep:focus-visible {
+    background-size: 100% 1px;
+    transition-duration: 150ms;
+  }
+
+  /* ---- scroll-driven scrubs ----------------------------------------------
+     Two progress indicators, both tied to the reader's own scrolling rather
+     than fired once on arrival. Both run entirely on the compositor.
+
+     These are deliberately NOT wrapped in the reduced-motion gate the way the
+     rest of the motion system is. A progress indicator is a 1:1 map of an
+     input the user is already producing - it does not move unless they move
+     it - and removing it removes information rather than removing motion. The
+     reduced-motion contract is about autonomous movement.
+
+     @supports is load-bearing: without scroll-driven animation support the
+     `animation` shorthand would still parse, fall back to the document
+     timeline, and play these through once on load at full speed.
+  ------------------------------------------------------------------------ */
+
+  .rail-track {
+    view-timeline-name: --rail;
+    view-timeline-axis: block;
+  }
+
+  .scroll-rail-progress {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* The pipeline rail draws in step with the scroll, so moving back up
+       retracts it. For a reveal that would be a bug - it is what `is-settled`
+       exists to prevent - but for a rail it is the whole point: this is a
+       pipeline you are travelling along, and the line should say where you
+       are on it. */
+    .rail-draw {
+      transition: none;
+      animation: rail-scrub linear both;
+      animation-timeline: --rail;
+      /* Both ends cover-relative. Mixing an `entry` start with a `cover`
+         end is legal but the two are measured against different intervals,
+         so the range can invert without erroring - it just silently stops
+         being monotonic. */
+      animation-range: cover 22% cover 55%;
+    }
+
+    .rail-draw-y {
+      transition: none;
+      animation: rail-scrub-y linear both;
+      animation-timeline: --rail;
+      animation-range: cover 14% cover 74%;
+    }
+
+    /* Page progress across the top of the nav. */
+    .scroll-rail-progress {
+      animation: rail-scrub linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @keyframes rail-scrub {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* Vertical twin, for the stacked layout below lg. Same timeline, same
+     range - only the axis changes, because below lg the pipeline runs down
+     the page instead of across it. */
+  .rail-draw-y {
+    transform: scaleY(0);
+    transform-origin: top center;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-in .rail-draw-y,
+  .reveal.is-settled .rail-draw-y {
+    transform: scaleY(1);
+  }
+
+  @keyframes rail-scrub-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /* ---- pipeline nodes ----------------------------------------------------
+     Each node lights as the rail reaches it, staggered by animation-range so
+     the sequence reads left to right. Scrubbed, not timed: arriving at a
+     stage is something the READER does. The packet that used to run the rail
+     on its own clock is gone - a third timer on a rail that already has a
+     scrub and a spark was noise, not information.
+  ------------------------------------------------------------------------ */
+
+  .node-spark {
+    border-radius: 999px;
+    background: var(--color-lime-dim);
+  }
+
+  @supports (animation-timeline: view()) {
+    .node-spark {
+      animation: node-spark linear both;
+      animation-timeline: --rail;
+    }
+  }
+
+  @keyframes node-spark {
+    from {
+      transform: scale(0.35);
+      opacity: 0.3;
+      box-shadow: 0 0 0 0 transparent;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+      box-shadow: 0 0 0 3px
+        color-mix(in oklab, var(--color-lime-dim) 22%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .node-spark {
+      animation: none !important;
+      transform: none;
+      opacity: 1;
+      box-shadow: none;
+    }
+  }
+
+  /* ---- convergence -------------------------------------------------------
+     Six curves drawing themselves into one node.
+
+     This is the only effect on the page where the mechanism and the message
+     are the same object: the section claims six experts resolve to one
+     verdict, and the line is literally doing that. Everything else here
+     decorated a claim; this one performs it, which is why it is the one
+     diagram that survived the cut. The radar ping that used to sit behind it
+     is gone - a permanent pulse next to a one-shot draw dilutes the draw.
+
+     pathLength="1" is what makes it cheap. It renormalises each path to a
+     length of 1 regardless of its real geometry, so six curves of six
+     different lengths share ONE set of dash numbers - no per-path
+     measurement, no getTotalLength(), no JS at all.
+  ------------------------------------------------------------------------ */
+
+  .converge-line {
+    fill: none;
+    stroke: var(--color-edge);
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition:
+      stroke 260ms ease,
+      stroke-width 260ms ease;
+  }
+
+  .reveal.is-in .converge-line {
+    animation: draw-in 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(80ms + var(--i, 0) * 55ms);
+  }
+
+  @keyframes draw-in {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Same reason as .stagger: a CSS animation restarts on re-layout, and
+     during the restarted delay the curve is undrawn again. */
+  .reveal.is-settled .converge-line {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+
+  .converge-line[data-active="true"] {
+    stroke: var(--color-lime-dim);
+    stroke-width: 2;
+  }
+
+  .converge-node {
+    fill: var(--color-lime-dim);
+  }
+
+  /* Strokes that draw themselves in when their section arrives. Shares
+     draw-in with the convergence; pathLength="1" does the same work. */
+  .mk-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .reveal.is-in .mk-draw {
+    animation: draw-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--mk-base, 0ms) + var(--mk-i, 0) * 90ms);
+  }
+
+  /* pin it, or a resize restarts the draw and the mark vanishes mid-page */
+  .reveal.is-settled .mk-draw {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+
+  /* Cards that acknowledge the pointer without shouting. */
+  .lift {
+    /* Release is the resting state, so the SLOW duration lives here and the
+       fast one is overridden on :hover. Symmetric timing makes an interface
+       feel either sluggish on approach or twitchy on exit; asymmetric gets
+       both right. */
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 260ms ease,
+      box-shadow 260ms ease;
+  }
+
+  .lift:hover {
+    transform: translateY(-3px);
+    transition-duration: 140ms;
+  }
+
+  /* ---- tab panel swap ----------------------------------------------------
+     Re-keyed on every tab change so the animation replays. Short and small:
+     a long or large transition on content the user just asked for reads as
+     lag, not polish.
+  ------------------------------------------------------------------------ */
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .panel-in {
+    animation: panel-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* The sliding active indicator. Position and width come from the DOM via
+     custom properties, so one element travels between tabs instead of six
+     fading in and out. */
+  /* Anchored to the TOP and offset by --tab-y, not pinned to the bottom of
+     the list. The pills wrap to two rows at every width below 768, and a
+     bottom-pinned bar then underlines the second row while the selected tab
+     sits in the first - about 55px adrift, and pointing at the wrong tab. */
+  .tab-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-lime-dim);
+    width: var(--tab-w, 0px);
+    transform: translate(var(--tab-x, 0px), var(--tab-y, 0px));
+    transition:
+      transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ---- nav, condensed on scroll ------------------------------------------
+     Condensed state is INK - one rung below the page ground - so the bar
+     reads as recessed into the page rather than as a pill floating on a
+     lighter tray. It is the only element that crosses every section, so it
+     has to belong to the ground.
+  ------------------------------------------------------------------------ */
+
+  .nav-shell {
+    transition:
+      padding 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  [data-scrolled="true"] .nav-shell {
+    background-color: color-mix(in oklab, var(--color-ink) 85%, transparent);
+    border-color: color-mix(in oklab, var(--color-edge) 70%, transparent);
+    box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+  }
+
+  /* ---- reveal-on-scroll, below the fold --------------------------------- */
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Without JS there is no IntersectionObserver, so show everything. */
+  @media (scripting: none) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise {
+      animation: none;
+    }
+    .reveal,
+    .reveal-card {
+      opacity: 1;
+      transform: none;
+    }
+    /* Every motion primitive resolves to its finished state. Nothing here is
+       load-bearing for meaning, so switching it all off costs nothing. */
+    .stagger > *,
+    .reveal.is-in .stagger > * {
+      animation: none !important;
+      opacity: 1;
+    }
+    .rail-draw,
+    .reveal.is-in .rail-draw {
+      transform: scaleX(1);
+      transition: none;
+    }
+    .node-pop,
+    .reveal.is-in .node-pop {
+      transform: scale(1);
+      transition: none;
+    }
+    .panel-in {
+      animation: none !important;
+    }
+    /* The drawn state is the meaningful one - six lines reaching one node.
+       Switching the animation off must leave them drawn, not undrawn. */
+    .converge-line,
+    .reveal.is-in .converge-line,
+    .mk-draw,
+    .reveal.is-in .mk-draw {
+      animation: none !important;
+      stroke-dashoffset: 0;
+    }
+    .tab-indicator,
+    .lift,
+    .link-sweep,
+    .nav-shell {
+      transition: none;
+    }
+    .lift:hover {
+      transform: none;
+    }
+  }
 }
